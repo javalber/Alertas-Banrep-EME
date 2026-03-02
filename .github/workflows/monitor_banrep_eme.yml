@@ -1,0 +1,37 @@
+name: Monitor BanRep EME
+
+on:
+  schedule:
+    - cron: "0 13,19 * * *"  # 08:00 y 14:00 hora Colombia
+  workflow_dispatch:
+
+jobs:
+  check_eme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
+        run: python banrep_eme.py
+        env:
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+
+      - name: Commit changes if published
+        if: ${{ hashFiles('changed.flag') != '' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          rm -f changed.flag
+          git add ultimo_periodo.txt
+          git commit -m "Registrar publicación EME: $(cat ultimo_periodo.txt)"
+          git push
