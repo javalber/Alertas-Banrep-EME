@@ -5,6 +5,13 @@ on:
     - cron: "0 13,19 * * *"  # 08:00 y 14:00 hora Colombia
   workflow_dispatch:
 
+# Necesario para que el paso "Commit changes if published" pueda hacer
+# git push del estado (ultimo_periodo.txt) de vuelta al repo. Sin esto el
+# GITHUB_TOKEN es de solo lectura, el push falla y se reenvían correos
+# duplicados hasta que alguien actualice el archivo a mano.
+permissions:
+  contents: write
+
 jobs:
   check_eme:
     runs-on: ubuntu-latest
